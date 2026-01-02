@@ -1,0 +1,8 @@
+[package]
+name = "mc-protocol"
+version = "0.1.0"
+edition = "2024"
+description = "Minecraft protocols including network, versions and so on in Rust"
+license = "GPL-3.0-only"
+readme = "README.md"
+[dependencies]

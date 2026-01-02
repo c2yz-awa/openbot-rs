@@ -1,0 +1,2 @@
+[workspace]
+members = ["mc-protocol", "openbot-cli"]

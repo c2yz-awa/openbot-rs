@@ -1,0 +1,8 @@
+# Project
+.idea/
+Cargo.lock
+config.yml
+
+# Log
+logs/
+*.l[L]og
