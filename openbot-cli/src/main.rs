@@ -1,21 +1,21 @@
 mod config;
 mod tui;
 
-use chrono::Local;
-use tokio::fs;
-use tracing_subscriber::{fmt, prelude::*, EnvFilter};
-use tracing_subscriber::fmt::format::Writer;
 use crate::config::{AppConfig, AppType};
+use chrono::Local;
 use std::sync::{mpsc, OnceLock};
+use tokio::fs;
+use tracing_subscriber::fmt::format::Writer;
+use tracing_subscriber::{EnvFilter, fmt, prelude::*};
 
 // config 宏
-pub static CONFIG: OnceLock<AppConfig> = OnceLock::new();
-#[macro_export]
-macro_rules! config {
-    () => {
-        $crate::CONFIG.get().unwrap()
-    };
-}
+// pub static CONFIG: OnceLock<AppConfig> = OnceLock::new();
+// #[macro_export]
+// macro_rules! config {
+//     () => {
+//         $crate::CONFIG.get().unwrap()
+//     };
+// } 过时且诗山
 struct Timer;
 impl fmt::time::FormatTime for Timer {
     fn format_time(&self, w: &mut Writer<'_>) -> std::fmt::Result {
@@ -37,6 +37,11 @@ impl std::io::Write for TuiWriter {
         Ok(())
     }
 }
+static CONFIG: OnceLock<AppConfig> = OnceLock::new();
+// 获取配置 
+pub fn config() -> &'static AppConfig {
+    CONFIG.get().expect("Config isn't initialized.")
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -47,25 +52,32 @@ async fn main() -> anyhow::Result<()> {
     let file_appender = std::fs::File::create(format!("./logs/{}", log_name))?;
     let (writer, _guard) = tracing_appender::non_blocking(file_appender);
 
-    let config_res = AppConfig::load().await?;
-    CONFIG.set(config_res).ok();
-    match config!().app_type {
+    let _config = AppConfig::load().await?;
+    CONFIG.set(_config).ok();
+    match config().app_type {
         AppType::CLI => {
             tracing_subscriber::registry()
                 .with(EnvFilter::new("info"))
-                .with(fmt::layer().with_writer(move || TuiWriter { tx: tx.clone() })
-                    .with_ansi(true)
-                    .with_level(true)
-                    .with_target(false)
-                    .with_timer(Timer)
+                .with(
+                    fmt::layer()
+                        .with_writer(move || TuiWriter { tx: tx.clone() })
+                        .with_ansi(true)
+                        .with_level(true)
+                        .with_target(false)
+                        .with_timer(Timer),
                 )
-                .with(fmt::layer().with_writer(writer)
-                    .with_ansi(false)
-                    .with_timer(Timer)
+                .with(
+                    fmt::layer()
+                        .with_writer(writer)
+                        .with_ansi(false)
+                        .with_timer(Timer),
                 )
                 .init();
 
-            tracing::info!("OpenBot {0} launching in CLI mode...", env!("CARGO_PKG_VERSION"));
+            tracing::info!(
+                "OpenBot {0} launching in CLI mode...",
+                env!("CARGO_PKG_VERSION")
+            );
             tracing::info!("Loaded config.");
             let terminal = ratatui::init();
             let app = tui::TuiApp::new();

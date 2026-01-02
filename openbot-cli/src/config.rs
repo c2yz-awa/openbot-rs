@@ -2,8 +2,6 @@ use anyhow::Context;
 use serde::{Serialize, Deserialize};
 use tokio::fs; // 异步文件
 
-// 读取配置
-
 // 程序的类型
 // 1. Daemon 后期图形化的时候使用，通过网络传输，不能有命令交互
 // 2. CLI 纯命令行操纵，独立应用，与Daemon是排斥关系。

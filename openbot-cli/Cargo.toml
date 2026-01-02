@@ -27,3 +27,4 @@ crossterm = "0.29"
 ansi-to-tui = "7.0.0"
 # 杂项
 anyhow = "1.0"
+once_cell = "1.19.0"
